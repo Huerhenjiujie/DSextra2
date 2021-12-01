@@ -99,12 +99,39 @@ Column {data-width=350}
 ### Chart B
 
 ```{r}
-
+renderPlotly({
+  nyc_airbnb %>% 
+    filter(
+      borough == input$borough_choice, 
+      price %in% input$price_choice[1]:input$price_choice[2],
+      room_type == input$room_choice) %>%
+    count(neighbourhood) %>% 
+    mutate(neighbourhood = fct_reorder(neighbourhood, n)) %>% 
+    plot_ly(x = ~neighbourhood, y = ~n, color = ~neighbourhood, type = "bar")
+})
 ```
 
 ### Chart C
 
 ```{r}
+renderPlotly({ 
+  common_neighborhoods =
+    nyc_airbnb %>% 
+    filter(
+      borough == input$borough_choice,
+      price %in% input$price_choice[1]:input$price_choice[2],
+      room_type == input$room_choice) %>%
+    count(neighbourhood, sort = TRUE) %>% 
+    top_n(8) %>% 
+    select(neighbourhood)
 
+  nyc_airbnb %>%
+    filter(
+      borough == input$borough_choice,
+      price %in% input$price_choice[1]:input$price_choice[2],
+      room_type == input$room_choice) %>%
+    inner_join(., common_neighborhoods, by = "neighbourhood") %>% 
+    plot_ly(y = ~price, color = ~neighbourhood, type = "box")
+})
 ```
 
